@@ -1,13 +1,65 @@
 pipeline{
   agent{
-     docker { image 'node:24-alpine'} 
+     docker { image 'node:22-alpine'} 
+  }
+
+  options{
+    disableConcurrentBuilds()
+  }
+
+  trigger{
+    pollSCM('H/5 * * * *')
   }
   stages{
-    stage ('Test'){
+    stage ('Build Backend'){
       steps{
-        sh 'npm -v'
-        sh 'node -v'
+        dir('backend'){
+            sh 'npm ci'
+            sh 'npm run check'
+        }
+        
       }
+    }
+
+    stage ('Build Frontend'){
+      steps {
+          dir('frontend'){
+            sh 'npm ci'
+            sh 'npm run build'
+          }
+      }
+    }
+
+    stage('Test Backend'){
+
+      steps{
+          dir('backend'){
+            sh 'npm test'
+          }
+      }
+    }
+
+    stage('Test Frontend'){
+      steps{
+        environment(
+          cI=true
+        )
+        dir('frontend'){
+          sh 'npm test'
+        }
+      }
+    }
+
+    post {
+        success {
+            archiveArtifacts artifacts: 'frontend/build/**', fingerprint: true
+        }
+        failure {
+            echo 'The pipeline failed. Read the console output above.'
+        }
+        always {
+            cleanWs()
+        }
     }
   }
 }
