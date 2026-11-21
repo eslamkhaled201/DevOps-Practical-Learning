@@ -7,7 +7,7 @@ pipeline{
     disableConcurrentBuilds()
   }
 
-  trigger{
+  triggers{
     pollSCM('H/5 * * * *')
   }
   stages{
@@ -40,10 +40,11 @@ pipeline{
     }
 
     stage('Test Frontend'){
+      environment(
+          CI= 'true'
+      )
       steps{
-        environment(
-          cI=true
-        )
+        
         dir('frontend'){
           sh 'npm test'
         }
