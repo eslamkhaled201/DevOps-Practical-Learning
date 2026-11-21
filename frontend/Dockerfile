@@ -1,0 +1,14 @@
+FROM node:22-alpine AS builder
+WORKDIR /app
+COPY package*.json .
+RUN npm ci --omit=dev
+COPY . .
+RUN npm run build
+
+FROM nginx:1.28-alpine
+COPY --from=builder --chown=nginx:nginx /app/build /usr/share/nginx/html
+RUN chown nginx:nginx /var/cache/nginx && \
+    chown nginx:nginx /run 
+USER nginx
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

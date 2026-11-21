@@ -1,0 +1,68 @@
+networks:
+  external:
+  internal:
+    internal: true
+
+volumes:
+  maison-db-data:
+  maison-uploads:
+
+services:
+  traefik:
+    image: traefik:v2.11          # Traefik uses the official image, no Dockerfile needed
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--api.dashboard=true"
+      - "--api.insecure=true"
+      - "--entrypoints.traefik.address=:9090"
+    ports:
+      - "0.0.0.0:80:80"
+      - "9090:9090"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    networks:
+      - internal
+      - external
+
+  db:
+    image: mysql:8.4
+    env_file: ./db/.env
+    volumes:
+      - maison-db-data:/var/lib/mysql
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    networks: [internal]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      
+  backend:
+    image: eslamkhaled98/maison-backend:v1.0
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=PathPrefix(`/api`) || PathPrefix(`/uploads`)"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.services.backend.loadbalancer.server.port=5000"
+    env_file: ./backend/.env
+    volumes:
+      - maison-uploads:/app/src/uploads
+    networks: [internal]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    image: eslamkhaled98/maison-frontend:v1.0
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.frontend.rule=PathPrefix(`/`)"
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.services.frontend.loadbalancer.server.port=80"
+    networks: [external, internal]
+    depends_on: [backend]
+    restart: unless-stopped

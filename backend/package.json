@@ -1,0 +1,29 @@
+{
+  "name": "fashion-store-backend",
+  "version": "1.0.0",
+  "description": "Fashion ecommerce REST API",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "seed": "node src/utils/seed.js",
+    "check": "node --check src/server.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.6.5",
+    "stripe": "^14.10.0"
+  },
+  "devDependencies": {
+    "jest": "^30.5.2",
+    "nodemon": "^3.0.2",
+    "supertest": "^7.3.2"
+  }
+}
