@@ -2,8 +2,10 @@ pipeline{
   //agent{
   //   docker { image 'node:22-alpine'} 
   //}
-  agent any
-  
+  agent {
+        docker { image 'node:22-alpine' }
+  }
+
   options{
     disableConcurrentBuilds()
   }
