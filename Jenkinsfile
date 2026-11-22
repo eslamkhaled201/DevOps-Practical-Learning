@@ -40,9 +40,9 @@ pipeline{
     }
 
     stage('Test Frontend'){
-      environment(
+      environment{
           CI= 'true'
-      )
+      }
       steps{
         
         dir('frontend'){
@@ -50,8 +50,9 @@ pipeline{
         }
       }
     }
+  }
 
-    post {
+  post {
         success {
             archiveArtifacts artifacts: 'frontend/build/**', fingerprint: true
         }
@@ -61,6 +62,5 @@ pipeline{
         always {
             cleanWs()
         }
-    }
   }
 }
