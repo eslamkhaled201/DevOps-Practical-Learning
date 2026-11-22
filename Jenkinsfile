@@ -1,15 +1,17 @@
 pipeline{
-  agent{
-     docker { image 'node:22-alpine'} 
-  }
-
+  //agent{
+  //   docker { image 'node:22-alpine'} 
+  //}
+  agent any
+  
   options{
     disableConcurrentBuilds()
   }
 
-  triggers{
-    pollSCM('H/5 * * * *')
-  }
+  //triggers{
+  //  pollSCM('H/5 * * * *')
+  //}
+
   stages{
     stage ('Build Backend'){
       steps{
